@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">OpenGLStudy</string>
+
+    <string name="change">切换</string>
+
+    <string name="type_draw">绘制形体</string>
+    <string name="type_texture">图片处理</string>
+    <string name="type_vary">图形变换</string>
+    <string name="type_camera">相机</string>
+    <string name="type_animation">压缩纹理动画</string>
+    <string name="type_fbo">FBO使用</string>
+    <string name="type_egl">EGL后台处理图片</string>
+    <string name="type_obj">3D Obj模型</string>
+    <string name="type_obj2">Obj+mtl模型</string>
+
+    <string name="pic_easy">原图</string>
+    <string name="pic_half">全部处理</string>
+    <string name="title_activity_s_g_l_view">SGLViewActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_audio_record">AudioRecordActivity</string>
+    <string name="title_activity_audio_record2">AudioRecordActivity2</string>
+</resources>
