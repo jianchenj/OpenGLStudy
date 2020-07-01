@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.AudioRecordActivity"
+            android:name=".activity.AudioRecorderActivity"
             android:label="@string/title_activity_audio_record"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

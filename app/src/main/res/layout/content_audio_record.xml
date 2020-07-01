@@ -7,6 +7,26 @@
 
 
     <Button
+        android:id="@+id/stop_playing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="280dp"
+        android:text="停止播放"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="272dp"
+        android:layout_marginTop="280dp"
+        android:text="暂停"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:id="@+id/start_recording"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,7 +62,17 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="116dp"
         android:layout_marginTop="148dp"
-        android:text="播放录音"
+        android:text="播放录音(Stream)"
+        app:layout_constraintLeft_toRightOf="@id/start_recording"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/play_recording2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="136dp"
+        android:layout_marginTop="400dp"
+        android:text="播放录音(Static)"
         app:layout_constraintLeft_toRightOf="@id/start_recording"
         app:layout_constraintTop_toTopOf="parent" />
 

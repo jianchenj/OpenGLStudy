@@ -30,6 +30,7 @@ class AudioRecorder constructor(val context: Context, private var audioInfo: Aud
 
     init {
         initAudioRecord()
+        minBufferSize = AudioRecordUtil.getMinBufferSize(audioInfo)
         data = ByteArray(minBufferSize)
     }
 
@@ -57,15 +58,11 @@ class AudioRecorder constructor(val context: Context, private var audioInfo: Aud
                 audioInfo.sampleRate,
                 audioInfo.channel,
                 audioInfo.format,
-                initMinBufferSize(audioInfo)
+                AudioRecordUtil.getMinBufferSize(audioInfo)
             )
         }
     }
 
-    private fun initMinBufferSize(info: AudioInfo): Int {
-        minBufferSize = AudioRecordUtil.getMinBufferSize(info)
-        return minBufferSize
-    }
 
     suspend fun startRecord(filePath: String) {
         file =
