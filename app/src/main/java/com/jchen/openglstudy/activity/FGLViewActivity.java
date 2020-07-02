@@ -9,8 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jchen.openglstudy.R;
-import com.jchen.openglstudy.render.FGLView;
-import com.jchen.openglstudy.render.Shape;
+import com.jchen.opengl.render.FGLView;
+import com.jchen.opengl.render.Shape;
 
 public class FGLViewActivity extends AppCompatActivity implements View.OnClickListener{
 

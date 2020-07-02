@@ -1,9 +1,8 @@
-package com.jchen.openglstudy.image
+package com.jchen.opengl.image
 
 import android.opengl.GLSurfaceView
 import android.view.View
-import com.jchen.openglstudy.image.filter.AFilter
-import com.jchen.openglstudy.image.filter.ContrastColorFilter
+import com.jchen.opengl.image.filter.AFilter
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 

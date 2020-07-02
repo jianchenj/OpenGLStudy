@@ -1,4 +1,4 @@
-package com.jchen.openglstudy.image.filter
+package com.jchen.opengl.image.filter
 
 import android.content.res.Resources
 import java.nio.FloatBuffer

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jchen.openglstudy.activity.AudioRecorderActivity
+import com.jchen.openglstudy.activity.CameraActivity
 import com.jchen.openglstudy.activity.FGLViewActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         add("绘制形体", FGLViewActivity::class.java)
         add("录音", AudioRecorderActivity::class.java)
+        add("相机", CameraActivity::class.java)
         mList.adapter = MenuAdapter()
     }
 

@@ -1,7 +1,6 @@
-package com.jchen.openglstudy.image.filter
+package com.jchen.opengl.image.filter
 
 import android.content.Context
-import android.graphics.ColorFilter
 
 
 class ContrastColorFilter constructor(context: Context) : AFilter() {

@@ -1,6 +1,5 @@
-package com.jchen.openglstudy.render;
+package com.jchen.opengl.render;
 
-import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.view.View;

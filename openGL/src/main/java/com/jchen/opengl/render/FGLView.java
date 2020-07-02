@@ -1,4 +1,4 @@
-package com.jchen.openglstudy.render;
+package com.jchen.opengl.render;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;

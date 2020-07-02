@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jchen.openglstudy.R;
-import com.jchen.openglstudy.render.Triangle;
+import com.jchen.opengl.render.Triangle;
 
 import java.util.ArrayList;
 

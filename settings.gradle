@@ -1,2 +1,4 @@
+include ':camera'
+include ':openGL'
 include ':app'
 rootProject.name = "OpenGLStudy"

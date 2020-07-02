@@ -1,10 +1,8 @@
-package com.jchen.openglstudy.image
+package com.jchen.opengl.image
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import java.io.IOException
 
 class SGLView constructor(context: Context?, attrs: AttributeSet? = null) :
     GLSurfaceView(context, attrs) {

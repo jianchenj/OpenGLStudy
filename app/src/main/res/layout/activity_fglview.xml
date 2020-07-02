@@ -14,7 +14,7 @@
             android:onClick="onClick"
             android:text="@string/change" />
     </LinearLayout>
-    <com.jchen.openglstudy.render.FGLView
+    <com.jchen.opengl.render.FGLView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mGLView"/>
