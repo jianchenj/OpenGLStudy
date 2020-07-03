@@ -17,7 +17,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.CameraActivity"></activity>
+        <activity android:name=".activity.CameraActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboard|screenSize"
+            >
+        </activity>
         <activity
             android:name=".activity.AudioRecorderActivity"
             android:label="@string/title_activity_audio_record"
