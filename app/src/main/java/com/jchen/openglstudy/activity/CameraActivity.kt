@@ -1,9 +1,12 @@
 package com.jchen.openglstudy.activity
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import com.jchen.camera.Camera2Helper
 import com.jchen.openglstudy.R
 import com.jchen.openglstudy.utils.PermissionUtil
@@ -38,6 +41,7 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.mirror_camera -> {
@@ -45,8 +49,9 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             R.id.take_picture -> {
-
+                mCamera2Helper.takePic()
             }
         }
     }
+
 }

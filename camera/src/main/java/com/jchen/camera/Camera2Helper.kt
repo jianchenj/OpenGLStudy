@@ -266,7 +266,6 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             result: TotalCaptureResult
         ) {
             super.onCaptureCompleted(session, request, result)
-            Log.i(Camera2Helper::javaClass.name, " onCaptureCompleted ")
         }
 
         /**
@@ -279,13 +278,12 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             partialResult: CaptureResult
         ) {
             super.onCaptureProgressed(session, request, partialResult)
-            Log.i(Camera2Helper::javaClass.name, " onCaptureProgressed ")
         }
     }
 
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
+    private val onImageAvailableListener = ImageReader.OnImageAvailableListener { it ->
 
         val image = it.acquireNextImage()
         val byteBuffer = image.planes[0].buffer
@@ -298,10 +296,15 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
                 byteArray,
                 mCameraSensorOrientation == 270,
                 { savePath: String, time: String ->
-                    mActivity.toast("图片保存成功！ 保存路径：$savePath 耗时：$time")
+                    mActivity.runOnUiThread {
+                        mActivity.toast("图片保存成功！ 保存路径：$savePath 耗时：$time")
+                    }
                 },
                 {
-                    mActivity.toast("图片保存失败 $it")
+                    Log.i("test0706", "aaa $it")
+                    mActivity.runOnUiThread {
+                        mActivity.toast("图片保存失败 $it")
+                    }
                 })
         }
     }
@@ -392,8 +395,30 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun takePic() {
-        if(mCameraDevice == null || !mTextureView.isAvailable || !canTakePic) return
+        if (mCameraDevice == null || !mTextureView.isAvailable || !canTakePic) return
+        mCameraDevice?.apply {
+            //apply 中this 可以省略
+            val captureRequestBuilder = createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+            captureRequestBuilder.addTarget(mImageReader!!.surface)
+
+            captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AF_MODE,
+                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+            )
+            captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AE_MODE,
+                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
+            )
+            captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mCameraSensorOrientation)
+            mCameraCaptureSession?.capture(captureRequestBuilder.build(), null, mCameraHandler)
+                ?: mActivity.toast("拍照异常")
+        }
+    }
+
+    fun exchangeCamera() {
+
     }
 
     private inner class CompareSizesByArea : Comparator<Size> {
@@ -406,7 +431,7 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
 
     fun mirrorPreview() {
         val matrix = Matrix()
-        matrix.setScale(-1f , 1f)//注意set... post... pre...的区别(post先，pre后)
+        matrix.setScale(-1f, 1f)//注意set... post... pre...的区别(post先，pre后)
         matrix.postTranslate(mTextureView.width.toFloat(), 0f)
         mTextureView.setTransform(matrix)
         mTextureView.invalidate()

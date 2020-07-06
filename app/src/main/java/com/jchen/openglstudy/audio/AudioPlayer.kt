@@ -17,8 +17,8 @@ import java.io.FileInputStream
 
 class AudioPlayer constructor(val context: Context) {
 
-    var audioTrack: AudioTrack? = null
-    var currentPosition: Long = 0
+    private var audioTrack: AudioTrack? = null
+    private var currentPosition: Long = 0
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     suspend fun playInModeStream(audioInfo: AudioInfo, path: String) {
