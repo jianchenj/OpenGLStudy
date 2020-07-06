@@ -3,7 +3,6 @@ package com.jchen.openglstudy.activity
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
@@ -24,6 +23,7 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener {
         mCamera2Helper = Camera2Helper(this, camera_texture_view)
         take_picture.setOnClickListener(this)
         mirror_camera.setOnClickListener(this)
+        exchange_camera.setOnClickListener(this)
     }
 
     override fun onRequestPermissionsResult(
@@ -51,7 +51,17 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener {
             R.id.take_picture -> {
                 mCamera2Helper.takePic()
             }
+
+            R.id.exchange_camera -> {
+                mCamera2Helper.exchangeCamera()
+            }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun onDestroy() {
+        super.onDestroy()
+        mCamera2Helper.releaseCamera()
+        mCamera2Helper.releaseThread()
+    }
 }

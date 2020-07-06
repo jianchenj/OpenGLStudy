@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.graphics.Matrix
+import android.graphics.RectF
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.hardware.camera2.params.Face
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.media.ImageReader
 import android.os.Build
@@ -24,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.Comparator
 import kotlin.collections.ArrayList
 
 //参照:  https://www.jianshu.com/p/0ea5e201260f
@@ -36,7 +37,7 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
         const val SAVE_HEIGHT = 1280    //保存图片的高度
     }
 
-    private var mCameraSensorOrientation: Int? = 0  //摄像头方向
+    private var mCameraSensorOrientation: Int = 0  //摄像头方向
     private var mCameraId: String = "0"
     private lateinit var mCameraManager: CameraManager
     private var mCameraHandler: Handler
@@ -46,6 +47,11 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
     private var mCameraDevice: CameraDevice? = null
     private var mCameraCaptureSession: CameraCaptureSession? = null
     private var canTakePic = true // TODO: 2020/7/3 是不是拍照过程中将这个flag置为false，代表需要等到拍完才能再拍
+    private var canExchangeCamera = false //是否可以切换摄像头
+    private var openFaceDetect = true
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private var mFaceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_OFF
 
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -54,10 +60,18 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
     private val handlerThread = HandlerThread("CameraThread")
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private var mSavePicSize = Size(PREVIEW_WIDTH, PREVIEW_HEIGHT) //保存图片大小
+    private var mSavePicSize = Size(SAVE_WIDTH, SAVE_HEIGHT) //保存图片大小
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private var mPreviewSize = Size(PREVIEW_WIDTH, PREVIEW_HEIGHT) //预览大小
+
+    private var mFaceDetectMatrix = Matrix()                //人脸检测坐标转换矩阵
+    private var mFacesRects = ArrayList<RectF>()              //保存人脸坐标信息
+    private var mFaceDetectListener: FaceDetectListener? = null       //人脸检测回调
+
+    interface FaceDetectListener {
+        fun onFaceDetect(faces: Array<Face>, facesRect: ArrayList<RectF>)
+    }
 
     /**
      * 打开相机，创建回话都是耗时操作
@@ -72,16 +86,19 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
         handlerThread.start()
         mCameraHandler = Handler(handlerThread.looper)
         mTextureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun onSurfaceTextureSizeChanged(
                 surface: SurfaceTexture?,
                 width: Int,
                 height: Int
             ) {
+                configureTransform(width, height)
             }
 
             override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
             }
 
+            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
                 releaseCamera()
                 return true
@@ -93,10 +110,35 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
                 width: Int,
                 height: Int
             ) {
+                configureTransform(width, height)
                 initCameraInfo()
             }
 
         }
+    }
+
+    // TODO: 2020/7/6 这是用来做啥的
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun configureTransform(width: Int, height: Int) {
+        val rotation = mActivity.windowManager.defaultDisplay.rotation
+        val matrix = Matrix()
+        val viewRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        val bufferRect = RectF(0f, 0f, mPreviewSize.height.toFloat(), mPreviewSize.width.toFloat())
+        val centerX = viewRect.centerX()
+        val centerY = viewRect.centerY()
+        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
+            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
+            val scale = Math.max(
+                height.toFloat() / mPreviewSize.height,
+                width.toFloat() / mPreviewSize.width
+            )
+            matrix.postScale(scale, scale, centerX, centerY)
+            matrix.postRotate((90 * (rotation - 2)).toFloat(), centerX, centerY)
+        } else if (Surface.ROTATION_180 == rotation) {
+            matrix.postRotate(180f, centerX, centerY)
+        }
+        mTextureView.setTransform(matrix)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -125,7 +167,7 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
 
         //摄像头方向
         mCameraSensorOrientation =
-            mCameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)
+            mCameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
         //获取摄像头管理支持的格式和尺寸的map
         val configurationMap: StreamConfigurationMap? =
             mCameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
@@ -171,8 +213,66 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
                 1
             )
             mImageReader?.setOnImageAvailableListener(onImageAvailableListener, mCameraHandler)
+
+            if (openFaceDetect) {
+                initFaceDetect()
+            }
+
             openCamera()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun initFaceDetect() {
+        //支持检测的面部个数
+        val faceDetectCount =
+            mCameraCharacteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT)
+        //支持的人脸检测模式
+        val faceDetectModes =
+            mCameraCharacteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES)
+                ?: return
+
+        mFaceDetectMode = when {
+            faceDetectModes.contains(CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL) -> CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL
+            faceDetectModes.contains(CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE) -> CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE
+            else -> CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF
+        }
+
+        if (mFaceDetectMode == CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF) {
+            mActivity.toast("不支持人脸检测")
+            return
+        }
+
+        val activeArraySizeRect =
+            mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+                ?: return//获取成像区域
+        val scaleWidth = mPreviewSize.width / activeArraySizeRect.width().toFloat()
+        val scaleHeight = mPreviewSize.height / activeArraySizeRect.height().toFloat()
+        val mirror = mCameraFacing == CameraCharacteristics.LENS_FACING_FRONT
+
+        mFaceDetectMatrix.setRotate(mCameraSensorOrientation.toFloat())
+        mFaceDetectMatrix.postScale(if (mirror) -scaleWidth else scaleWidth, scaleHeight)
+        if (exchangeWidthAndHeight(mDisplayRotation, mCameraSensorOrientation)) {
+            mFaceDetectMatrix.postTranslate(
+                mPreviewSize.height.toFloat(),
+                mPreviewSize.width.toFloat()
+            )
+        }
+
+        Log.i(
+            "Camera2Helper",
+            "成像区域  ${activeArraySizeRect.width()}  ${activeArraySizeRect.height()} 比例: ${activeArraySizeRect.width()
+                .toFloat() / activeArraySizeRect.height()}"
+        )
+        Log.i(
+            "Camera2Helper",
+            "预览区域  ${mPreviewSize.width}  ${mPreviewSize.height} 比例 ${mPreviewSize.width.toFloat() / mPreviewSize.height}"
+        )
+
+        for (mode in faceDetectModes) {
+            Log.i("Camera2Helper", "支持的人脸检测模式 $mode")
+        }
+        Log.i("Camera2Helper", "同时检测到人脸的数量 $faceDetectCount")
     }
 
 
@@ -259,13 +359,20 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             mActivity.toast("拍摄失败！")
         }
 
-
+        //预览的时候会持续回调，预览可以理解为连续多次的capture，所以一次capture完成之后就会回调这个方法一次
         override fun onCaptureCompleted(
             session: CameraCaptureSession,
             request: CaptureRequest,
             result: TotalCaptureResult
         ) {
             super.onCaptureCompleted(session, request, result)
+            Log.i("test0706", "onCaptureCompleted openFaceDetect = $openFaceDetect")
+            Log.i("test0706", "onCaptureCompleted mFaceDetectMode = $mFaceDetectMode")
+            if (openFaceDetect && mFaceDetectMode != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF) {
+                handleFaces(result)
+            }
+            canExchangeCamera = true
+            canTakePic = true
         }
 
         /**
@@ -278,6 +385,56 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             partialResult: CaptureResult
         ) {
             super.onCaptureProgressed(session, request, partialResult)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun handleFaces(result: TotalCaptureResult) {
+        val faces = result.get(CaptureResult.STATISTICS_FACES) ?: return
+        mFacesRects.clear()
+        Log.i("test0706", " handleFaces ")
+        for (face in faces) {
+            val bounds = face.bounds
+            val left = bounds.left
+            val right = bounds.right
+            val top = bounds.top
+            val bottom = bounds.bottom
+
+            //原始面部方块,默认方向是屏幕面朝方向
+            val rawFaceRect =
+                RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+            mFaceDetectMatrix.mapRect(rawFaceRect)// TODO: 2020/7/6 mapRect 将此矩阵应用于矩形，并将转换后的矩形写回该矩形？？
+
+            val resultFaceRect = if (mCameraFacing == CaptureRequest.LENS_FACING_FRONT) {
+                rawFaceRect
+            } else {
+                RectF(
+                    rawFaceRect.left,
+                    rawFaceRect.top - mPreviewSize.width,// TODO: 2020/7/6 ????? 没看明白
+                    rawFaceRect.right,
+                    rawFaceRect.bottom - mPreviewSize.width
+                )
+            }
+
+            mFacesRects.add(resultFaceRect)
+
+            Log.i(
+                "test0706",
+                "原始人脸位置: $rawFaceRect"
+            )
+
+            Log.i(
+                "test0706",
+                "原始人脸位置: ${bounds.width()} * ${bounds.height()}   ${bounds.left} ${bounds.top} ${bounds.right} ${bounds.bottom}   分数: ${face.score}"
+            )
+            Log.i(
+                "test0706",
+                "转换后人脸位置: ${resultFaceRect.width()} * ${resultFaceRect.height()}   ${resultFaceRect.left} ${resultFaceRect.top} ${resultFaceRect.right} ${resultFaceRect.bottom}   分数: ${face.score}"
+            )
+        }
+
+        mActivity.runOnUiThread {
+            mFaceDetectListener?.onFaceDetect(faces, mFacesRects)
         }
     }
 
@@ -301,7 +458,6 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
                     }
                 },
                 {
-                    Log.i("test0706", "aaa $it")
                     mActivity.runOnUiThread {
                         mActivity.toast("图片保存失败 $it")
                     }
@@ -388,11 +544,27 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             "Camera2Helper",
             "exchangeWidthAndHeight cameraSensorOrientation $cameraSensorOrientation"
         )
+        Log.i("Camera2Helper", "exchangeWidthAndHeight exchange $exchange")
         return exchange
     }
 
-    private fun releaseCamera() {
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun releaseCamera() {
+        mCameraCaptureSession?.close()
+        mCameraCaptureSession = null
 
+        mCameraDevice?.close()
+        mCameraDevice = null
+
+        mImageReader?.close()
+        mImageReader = null
+
+        canExchangeCamera = false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    fun releaseThread() {
+        handlerThread.quitSafely()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -417,8 +589,16 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun exchangeCamera() {
-
+        mCameraFacing = if (mCameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+            CameraCharacteristics.LENS_FACING_BACK
+        } else {
+            CameraCharacteristics.LENS_FACING_FRONT
+        }
+        mPreviewSize = Size(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+        releaseCamera()
+        initCameraInfo()
     }
 
     private inner class CompareSizesByArea : Comparator<Size> {

@@ -30,6 +30,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="左右镜像" />
+
+        <Button
+            android:id="@+id/exchange_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="切换前后摄" />
     </LinearLayout>
 
 </FrameLayout>
