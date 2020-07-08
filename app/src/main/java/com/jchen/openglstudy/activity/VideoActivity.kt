@@ -75,6 +75,8 @@ class VideoActivity : AppCompatActivity() {
             }
         }
         Log.i("test0708", "onActivityResult $icon_path")
+        //"android.resource://" + packageName + "/"+R.raw.money
+
     }
 
     private fun getRealPathFromURI(contentURI: Uri): String? {
