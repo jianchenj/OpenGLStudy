@@ -1,3 +1,5 @@
+include ':baisc'
+include ':avEdit'
 include ':camera'
 include ':openGL'
 include ':app'

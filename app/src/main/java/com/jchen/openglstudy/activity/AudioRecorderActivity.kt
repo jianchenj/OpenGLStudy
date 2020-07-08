@@ -8,13 +8,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.jchen.baisc.util.PermissionUtil
 import com.jchen.openglstudy.R
 import com.jchen.openglstudy.audio.AudioInfo
 import com.jchen.openglstudy.audio.AudioPlayer
 import com.jchen.openglstudy.audio.AudioRecorder
 import com.jchen.openglstudy.utils.AudioRecordUtil
-import com.jchen.openglstudy.utils.FileUtil
-import com.jchen.openglstudy.utils.PermissionUtil
 import kotlinx.android.synthetic.main.content_audio_record.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -68,7 +67,7 @@ class AudioRecorderActivity : AppCompatActivity(), View.OnClickListener {
                     val file = File(wavPath)
                     Log.d(
                         "AudioRecorder",
-                        "aaaaaaaaaa  $wavPath ,  ${FileUtil.getPrintSize(file.length())}"
+                        "aaaaaaaaaa  $wavPath ,  ${com.jchen.baisc.util.FileUtil.getPrintSize(file.length())}"
                     )
                 }
             }

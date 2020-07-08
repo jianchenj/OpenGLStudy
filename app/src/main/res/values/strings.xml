@@ -26,4 +26,5 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_audio_record">AudioRecordActivity</string>
     <string name="title_activity_audio_record2">AudioRecordActivity2</string>
+    <string name="title_activity_video">VideoActivity</string>
 </resources>

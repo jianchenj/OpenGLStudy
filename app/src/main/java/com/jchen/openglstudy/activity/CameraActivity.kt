@@ -1,15 +1,17 @@
 package com.jchen.openglstudy.activity
 
+import android.content.Intent
 import android.graphics.RectF
 import android.hardware.camera2.params.Face
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import com.jchen.camera.Camera2Helper
 import com.jchen.openglstudy.R
-import com.jchen.openglstudy.utils.PermissionUtil
+import com.jchen.baisc.util.PermissionUtil
 import kotlinx.android.synthetic.main.activity_camera.*
 
 class CameraActivity : AppCompatActivity(), Camera2Helper.FaceDetectListener {
@@ -21,12 +23,12 @@ class CameraActivity : AppCompatActivity(), Camera2Helper.FaceDetectListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        PermissionUtil.checkCameraRecordPermissions(this)
+        com.jchen.baisc.util.PermissionUtil.checkCameraRecordPermissions(this)
         mCamera2Helper = Camera2Helper(this, camera_texture_view)
         mCamera2Helper.setFaceDetectListener(this)
         take_picture.setOnClickListener { mCamera2Helper.takePic() }
         mirror_camera.setOnClickListener { mCamera2Helper.mirrorPreview() }
-        exchange_camera.setOnClickListener { mCamera2Helper.exchangeCamera() }
+        exchange_camera.setOnClickListener { /*mCamera2Helper.exchangeCamera() */ gotoCaptureVideo()}
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -34,6 +36,12 @@ class CameraActivity : AppCompatActivity(), Camera2Helper.FaceDetectListener {
         super.onDestroy()
         mCamera2Helper.releaseCamera()
         mCamera2Helper.releaseThread()
+    }
+
+    private fun gotoCaptureVideo() {
+        var intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        if (intent.resolveActivity(packageManager) != null)
+            startActivityForResult(intent, 11)
     }
 
     override fun onFaceDetect(faces: Array<Face>, facesRect: ArrayList<RectF>) {
@@ -46,7 +54,7 @@ class CameraActivity : AppCompatActivity(), Camera2Helper.FaceDetectListener {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (PermissionUtil.isGranted(grantResults) && PermissionUtil.hasPermission(
+        if (com.jchen.baisc.util.PermissionUtil.isGranted(grantResults) && com.jchen.baisc.util.PermissionUtil.hasPermission(
                 this,
                 permissions
             )

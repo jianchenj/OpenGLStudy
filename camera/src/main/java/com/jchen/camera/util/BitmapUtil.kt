@@ -1,5 +1,6 @@
 package com.jchen.camera.util
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -48,11 +49,17 @@ object BitmapUtil {
                 val picFile = FileUtil.createCameraFile(context, "camera2", fileName)
                 if (picFile != null && data != null) {
                     val rawBitMap = BitmapFactory.decodeByteArray(data, 0, data.size)
-                    val resultBitmap = if (isMirror) mirror(rawBitMap) else rawBitMap
+                    val resultBitmap = if (isMirror) mirror(
+                        rawBitMap
+                    ) else rawBitMap
 
                     ////Okio Sink和Source Okio.sink(picFile)已经弃用 ，改用file的拓展方法
                     //sink 类似OutputStream， Source类似InputStream
-                    picFile.sink().buffer().write(toByteArray(resultBitmap)).close()
+                    picFile.sink().buffer().write(
+                        toByteArray(
+                            resultBitmap
+                        )
+                    ).close()
 
                     onSuccess(picFile.absolutePath, "${System.currentTimeMillis() - temp}")
 
@@ -60,7 +67,10 @@ object BitmapUtil {
                         "BitmapUtil",
                         "savePic! time：${System.currentTimeMillis() - temp}    path：  ${picFile.absolutePath}"
                     )
-                    addMediaStore(context, picFile)
+                    addMediaStore(
+                        context,
+                        picFile
+                    )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -78,6 +88,7 @@ object BitmapUtil {
     }
 
 
+    @SuppressLint("NewApi")
     private fun addMediaStore(
         context: Context,
         targetFile: File

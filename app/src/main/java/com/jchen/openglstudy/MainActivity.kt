@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jchen.openglstudy.activity.AudioRecorderActivity
 import com.jchen.openglstudy.activity.CameraActivity
 import com.jchen.openglstudy.activity.FGLViewActivity
+import com.jchen.openglstudy.activity.VideoActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         add("绘制形体", FGLViewActivity::class.java)
         add("录音", AudioRecorderActivity::class.java)
         add("相机", CameraActivity::class.java)
+        add("音视频", VideoActivity::class.java)
         mList.adapter = MenuAdapter()
     }
 

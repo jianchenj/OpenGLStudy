@@ -1,13 +1,11 @@
 package com.jchen.openglstudy.audio
 
 import android.content.Context
-import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.os.Environment
 import android.util.Log
 import com.jchen.openglstudy.utils.AudioRecordUtil
-import com.jchen.openglstudy.utils.FileUtil.getPrintSize
+import com.jchen.baisc.util.FileUtil.getPrintSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
