@@ -45,7 +45,7 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
     private val mDisplayRotation = mActivity.windowManager.defaultDisplay.rotation  //手机方向
     private var mImageReader: ImageReader? = null
     private var mCameraDevice: CameraDevice? = null
-    private var mCameraCaptureSession: CameraCaptureSession? = null
+    private var mCameraCaptureSession: CameraCaptureSession? = null//重点：会话
     private var canTakePic = true // TODO: 2020/7/3 是不是拍照过程中将这个flag置为false，代表需要等到拍完才能再拍
     private var canExchangeCamera = false //是否可以切换摄像头
     private var openFaceDetect = true
@@ -71,6 +71,10 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
 
     interface FaceDetectListener {
         fun onFaceDetect(faces: Array<Face>, facesRect: ArrayList<RectF>)
+    }
+
+    fun setFaceDetectListener(listener: FaceDetectListener) {
+        this.mFaceDetectListener = listener
     }
 
     /**
@@ -250,14 +254,25 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
         val scaleHeight = mPreviewSize.height / activeArraySizeRect.height().toFloat()
         val mirror = mCameraFacing == CameraCharacteristics.LENS_FACING_FRONT
 
-        mFaceDetectMatrix.setRotate(mCameraSensorOrientation.toFloat())
-        mFaceDetectMatrix.postScale(if (mirror) -scaleWidth else scaleWidth, scaleHeight)
+        //Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}, 角度 90.0
+        mFaceDetectMatrix.setRotate(mCameraSensorOrientation.toFloat())//将矩形旋转到camera角度得(前乘) Matrix{[0.0, -1.0, 0.0][1.0, 0.0, 0.0][0.0, 0.0, 1.0]
+
+
+        mFaceDetectMatrix.postScale(
+            if (mirror) -scaleWidth else scaleWidth,
+            scaleHeight
+        )//(后乘) 缩放，如果是前摄的话还需要翻转一下(x-1)
+        //到目前为止人脸的矩阵初始化完成
+
+        Log.i("test0707", "aaaaaaaa mFaceDetectMatrix $mFaceDetectMatrix")
         if (exchangeWidthAndHeight(mDisplayRotation, mCameraSensorOrientation)) {
+            Log.i("test0707", "wwwwwwwwwwwwwwwwwwwwwwwwww")
             mFaceDetectMatrix.postTranslate(
-                mPreviewSize.height.toFloat(),
-                mPreviewSize.width.toFloat()
+                mPreviewSize.width.toFloat(),
+                mPreviewSize.height.toFloat()
             )
         }
+        Log.i("test0707", "mFaceDetectMatrix $mFaceDetectMatrix")
 
         Log.i(
             "Camera2Helper",
@@ -366,8 +381,6 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
             result: TotalCaptureResult
         ) {
             super.onCaptureCompleted(session, request, result)
-            Log.i("test0706", "onCaptureCompleted openFaceDetect = $openFaceDetect")
-            Log.i("test0706", "onCaptureCompleted mFaceDetectMode = $mFaceDetectMode")
             if (openFaceDetect && mFaceDetectMode != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF) {
                 handleFaces(result)
             }
@@ -392,50 +405,39 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
     private fun handleFaces(result: TotalCaptureResult) {
         val faces = result.get(CaptureResult.STATISTICS_FACES) ?: return
         mFacesRects.clear()
-        Log.i("test0706", " handleFaces ")
         for (face in faces) {
             val bounds = face.bounds
             val left = bounds.left
-            val right = bounds.right
             val top = bounds.top
+            val right = bounds.right
             val bottom = bounds.bottom
 
-            //原始面部方块,默认方向是屏幕面朝方向
             val rawFaceRect =
                 RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
-            mFaceDetectMatrix.mapRect(rawFaceRect)// TODO: 2020/7/6 mapRect 将此矩阵应用于矩形，并将转换后的矩形写回该矩形？？
 
-            val resultFaceRect = if (mCameraFacing == CaptureRequest.LENS_FACING_FRONT) {
+            Log.i("test0707", "rawFaceRect = $rawFaceRect")
+            mFaceDetectMatrix.mapRect(rawFaceRect)
+            Log.i("test0707", "rawFaceRect = $rawFaceRect")
+
+            val resultFaceRect = if (mCameraFacing == CaptureRequest.LENS_FACING_FRONT)
                 rawFaceRect
-            } else {
+            else
                 RectF(
                     rawFaceRect.left,
-                    rawFaceRect.top - mPreviewSize.width,// TODO: 2020/7/6 ????? 没看明白
+                    rawFaceRect.top - mPreviewSize.width,
                     rawFaceRect.right,
                     rawFaceRect.bottom - mPreviewSize.width
                 )
-            }
 
             mFacesRects.add(resultFaceRect)
 
-            Log.i(
-                "test0706",
-                "原始人脸位置: $rawFaceRect"
-            )
 
-            Log.i(
-                "test0706",
-                "原始人脸位置: ${bounds.width()} * ${bounds.height()}   ${bounds.left} ${bounds.top} ${bounds.right} ${bounds.bottom}   分数: ${face.score}"
-            )
-            Log.i(
-                "test0706",
-                "转换后人脸位置: ${resultFaceRect.width()} * ${resultFaceRect.height()}   ${resultFaceRect.left} ${resultFaceRect.top} ${resultFaceRect.right} ${resultFaceRect.bottom}   分数: ${face.score}"
-            )
         }
 
         mActivity.runOnUiThread {
             mFaceDetectListener?.onFaceDetect(faces, mFacesRects)
         }
+        //log("onCaptureCompleted  检测到 ${faces.size} 张人脸")
     }
 
 
@@ -611,8 +613,8 @@ class Camera2Helper(private val mActivity: Activity, private val mTextureView: T
 
     fun mirrorPreview() {
         val matrix = Matrix()
-        matrix.setScale(-1f, 1f)//注意set... post... pre...的区别(post先，pre后)
-        matrix.postTranslate(mTextureView.width.toFloat(), 0f)
+        matrix.setScale(-1f, 1f)//注意set会取消之前所有的set的效果
+        matrix.postTranslate(mTextureView.width.toFloat(), 0f)//post代表后乘， pre代表前乘 矩阵乘法前后乘效果是不一样的
         mTextureView.setTransform(matrix)
         mTextureView.invalidate()
     }

@@ -7,9 +7,14 @@
     tools:context=".activity.CameraActivity">
 
 
-
     <TextureView
         android:id="@+id/camera_texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <com.jchen.camera.view.FaceView
+        android:id="@+id/face_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
