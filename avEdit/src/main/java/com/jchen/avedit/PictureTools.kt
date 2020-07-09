@@ -1,12 +1,8 @@
 package com.jchen.avedit
 
-import android.R
-import android.R.attr.path
 import android.graphics.*
 import android.media.ExifInterface
 import android.util.Log
-import android.widget.ImageView
-import java.io.File
 import java.io.IOException
 import kotlin.math.ceil
 

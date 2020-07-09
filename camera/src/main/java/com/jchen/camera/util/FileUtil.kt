@@ -1,15 +1,11 @@
 package com.jchen.camera.util
 
-import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.annotation.RequiresApi
 import java.io.File
-import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.util.*
 
 object FileUtil {
 

@@ -3,7 +3,6 @@ package com.jchen.openglstudy.activity
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log

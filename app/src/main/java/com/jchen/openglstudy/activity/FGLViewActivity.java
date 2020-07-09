@@ -8,9 +8,9 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.jchen.openglstudy.R;
 import com.jchen.opengl.render.FGLView;
 import com.jchen.opengl.render.Shape;
+import com.jchen.openglstudy.R;
 
 public class FGLViewActivity extends AppCompatActivity implements View.OnClickListener{
 

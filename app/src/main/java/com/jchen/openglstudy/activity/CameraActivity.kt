@@ -4,14 +4,13 @@ import android.content.Intent
 import android.graphics.RectF
 import android.hardware.camera2.params.Face
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.jchen.camera.Camera2Helper
 import com.jchen.openglstudy.R
-import com.jchen.baisc.util.PermissionUtil
 import kotlinx.android.synthetic.main.activity_camera.*
 
 class CameraActivity : AppCompatActivity(), Camera2Helper.FaceDetectListener {

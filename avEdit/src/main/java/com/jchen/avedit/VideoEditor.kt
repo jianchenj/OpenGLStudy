@@ -1,6 +1,5 @@
 package com.jchen.avedit
 
-import android.annotation.TargetApi
 import android.content.res.AssetFileDescriptor
 import android.media.MediaCodec
 import android.media.MediaExtractor
