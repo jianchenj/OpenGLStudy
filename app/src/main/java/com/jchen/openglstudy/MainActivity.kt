@@ -1,18 +1,26 @@
 package com.jchen.openglstudy
 
 import android.content.Intent
+import android.content.res.AssetFileDescriptor
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.jchen.avedit.VideoEditor
 import com.jchen.openglstudy.activity.AudioRecorderActivity
 import com.jchen.openglstudy.activity.CameraActivity
 import com.jchen.openglstudy.activity.FGLViewActivity
 import com.jchen.openglstudy.activity.VideoActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -26,22 +34,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         add("录音", AudioRecorderActivity::class.java)
         add("相机", CameraActivity::class.java)
         add("音视频", VideoActivity::class.java)
+        add("音视频", VideoActivity::class.java)
+        add("视频合并", null)
         mList.adapter = MenuAdapter()
     }
 
-    private fun add(name: String, clazz: Class<*>) {
+    private fun add(name: String, clazz: Class<*>?) {
         val bean = MenuBean()
         bean.name = name
         bean.clazz = clazz
         data.add(bean)
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onClick(v: View?) {
         if (v == null) {
             return
         }
         val bean = data[v.tag as Int]
-        startActivity(Intent(this, bean.clazz))
+        if (mList.adapter?.getItemViewType(v.tag as Int) == 0) {
+            when(bean.name) {
+                "视频合并" -> {
+                    MainScope().launch {
+                        val file = File("${this@MainActivity.getExternalFilesDir(Environment.DIRECTORY_MUSIC)}/test.mp4")
+
+                        val afd: AssetFileDescriptor =
+                            resources.openRawResourceFd(R.raw.test1)
+                        val afd2: AssetFileDescriptor =
+                            resources.openRawResourceFd(R.raw.v1080)
+
+                        VideoEditor.combineTwoVideos(afd,
+                        0, afd2, file)
+                    }
+                }
+            }
+        } else {
+            startActivity(Intent(this, bean.clazz))
+        }
     }
 
     private class MenuBean {
@@ -76,6 +105,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         override fun onBindViewHolder(holder: MenuHolder, position: Int) {
             holder.position = position
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return if (data[position].clazz == null) {
+                0
+            } else {
+                1
+            }
         }
     }
 }
