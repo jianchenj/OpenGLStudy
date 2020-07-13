@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jchen.avedit.VideoEditor
+import com.jchen.camera.util.BitmapUtil
 import com.jchen.openglstudy.activity.AudioRecorderActivity
 import com.jchen.openglstudy.activity.CameraActivity
 import com.jchen.openglstudy.activity.FGLViewActivity
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                         VideoEditor.combineTwoVideos(afd,
                         0, afd2, file)
+                        BitmapUtil.addVideo2MediaStore(this@MainActivity ,file)
                     }
                 }
             }

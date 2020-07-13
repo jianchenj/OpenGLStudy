@@ -37,7 +37,7 @@ object VideoEditor {
      *@param target 目标文件
      */
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    suspend fun combineTwoVideos(
+    suspend fun  combineTwoVideos(
         audioSource: AssetFileDescriptor,
         audioStartTime: Long,
         videoSource: AssetFileDescriptor,
@@ -198,8 +198,8 @@ object VideoEditor {
             extractor.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)//设置视频源
             //extractor.setDataSource(sourcePath)
             Log.i("VideoEditor", "findTrackIndex : ${Thread.currentThread()}")
-            val audioSourceTrackCounts = extractor.trackCount//获取源的轨道数
-            for (i in 0 until audioSourceTrackCounts) {//遍历轨道，找到需要的音频轨道
+            val sourceTrackCounts = extractor.trackCount//获取源的轨道数
+            for (i in 0 until sourceTrackCounts) {//遍历轨道，找到需要的音频轨道
                 val format = extractor.getTrackFormat(i)//获取指定索引的MediaFormat
                 val mime = format.getString(MediaFormat.KEY_MIME)
                 Log.i("VideoEditor", "$i : mime: $mime")

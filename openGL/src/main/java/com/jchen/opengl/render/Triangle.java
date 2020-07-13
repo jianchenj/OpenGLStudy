@@ -11,7 +11,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class Triangle extends Shape {
+public class Triangle extends Shape {//implements GLSurfaceView.Renderer
 
     private FloatBuffer vertexBuffer;
     private final String vertexShaderCode =
@@ -31,7 +31,7 @@ public class Triangle extends Shape {
 
     static final int COORDS_PER_VERTEX = 3;
     static float triangleCoords[] = {
-            0.5f,  0.5f, 0.0f, // top
+            0.5f, 0.5f, 0.0f, // top
             -0.5f, -0.5f, 0.0f, // bottom left
             0.5f, -0.5f, 0.0f  // bottom right
     };
@@ -39,7 +39,7 @@ public class Triangle extends Shape {
     private int mPositionHandle;
     private int mColorHandle;
 
-    private float[] mViewMatrix=new float[16];
+    private float[] mViewMatrix = new float[16];
 
     //顶点个数
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
@@ -49,7 +49,7 @@ public class Triangle extends Shape {
     private int mMatrixHandler;
 
     //设置颜色，依次为红绿蓝和透明通道
-    float color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float color[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     public Triangle(View mView) {
         super(mView);
@@ -60,8 +60,18 @@ public class Triangle extends Shape {
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put(triangleCoords);
         vertexBuffer.position(0);
+
+//        int shader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
+//        //讲资源加入到着色器，并编译
+//        GLES20.glShaderSource(shader, vertexShaderCode);
+//        GLES20.glCompileShader(shader);
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
                 vertexShaderCode);
+
+//        int shader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);//创建shader
+//        //讲资源加入到着色器，并编译
+//        GLES20.glShaderSource(shader, fragmentShaderCode);//设置shader源
+//        GLES20.glCompileShader(shader);//compile shader
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
                 fragmentShaderCode);
 

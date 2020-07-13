@@ -67,7 +67,7 @@ object BitmapUtil {
                         "BitmapUtil",
                         "savePic! time：${System.currentTimeMillis() - temp}    path：  ${picFile.absolutePath}"
                     )
-                    addMediaStore(
+                    addImage2MediaStore(
                         context,
                         picFile
                     )
@@ -89,7 +89,7 @@ object BitmapUtil {
 
 
     @SuppressLint("NewApi")
-    private fun addMediaStore(
+    private fun addImage2MediaStore(
         context: Context,
         targetFile: File
     ) {
@@ -100,6 +100,26 @@ object BitmapUtil {
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         val uri: Uri =
             resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                ?: return
+        val out: OutputStream = resolver.openOutputStream(uri) ?: return
+        val fis = FileInputStream(targetFile)
+        FileUtils.copy(fis, out)
+        fis.close()
+        out.close()
+    }
+
+    @SuppressLint("NewApi")
+    fun addVideo2MediaStore(
+        context: Context,
+        targetFile: File
+    ) {
+        val resolver = context.contentResolver
+        val contentValues = ContentValues()
+        contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, targetFile.name)
+        contentValues.put(MediaStore.Video.Media.TITLE, targetFile.name)
+        contentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+        val uri: Uri =
+            resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
                 ?: return
         val out: OutputStream = resolver.openOutputStream(uri) ?: return
         val fis = FileInputStream(targetFile)

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.jchen.opengl.render.Rectangle;
 import com.jchen.opengl.render.Triangle;
 import com.jchen.openglstudy.R;
 
@@ -26,29 +27,30 @@ public class ChooseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context=this;
+        context = this;
         setContentView(R.layout.activity_list);
         init();
     }
 
-    private void init(){
+    private void init() {
         initData();
-        mList= (ListView) findViewById(R.id.mList);
+        mList = (ListView) findViewById(R.id.mList);
         mList.setAdapter(new Adapter());
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent=new Intent();
-                intent.putExtra("name",mData.get(position).clazz);
-                setResult(RESULT_OK,intent);
+                Intent intent = new Intent();
+                intent.putExtra("name", mData.get(position).clazz);
+                setResult(RESULT_OK, intent);
                 finish();
             }
         });
     }
 
-    private void initData(){
-        mData=new ArrayList<>();
+    private void initData() {
+        mData = new ArrayList<>();
         add("三角形", Triangle.class);
+        add("正方形", Rectangle.class);
 //        add("正三角形", TriangleWithCamera.class);
 //        add("彩色三角形", TriangleColorFull.class);
 //        add("正方形", Square.class);
@@ -60,15 +62,15 @@ public class ChooseActivity extends AppCompatActivity {
 //        add("带光源的球体",BallWithLight.class);
     }
 
-    private void add(String showName,Class<?> clazz){
-        Data data= new Data();
-        data.clazz=clazz;
-        data.showName=showName;
+    private void add(String showName, Class<?> clazz) {
+        Data data = new Data();
+        data.clazz = clazz;
+        data.showName = showName;
         mData.add(data);
     }
 
 
-    private static class Data{
+    private static class Data {
         String showName;
         Class<?> clazz;
     }
@@ -92,21 +94,23 @@ public class ChooseActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            if(convertView==null){
-                convertView= LayoutInflater.from(context).inflate(R.layout.item_choose,parent,false);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(R.layout.item_choose, parent, false);
                 convertView.setTag(new ViewHolder(convertView));
             }
-            ViewHolder holder= (ViewHolder) convertView.getTag();
+            ViewHolder holder = (ViewHolder) convertView.getTag();
             holder.setData(mData.get(position));
             return convertView;
         }
 
-        private class ViewHolder{
+        private class ViewHolder {
             private TextView mName;
-            public ViewHolder(View parent){
-                mName= (TextView) parent.findViewById(R.id.mName);
+
+            public ViewHolder(View parent) {
+                mName = (TextView) parent.findViewById(R.id.mName);
             }
-            public void setData(Data data){
+
+            public void setData(Data data) {
                 mName.setText(data.showName);
             }
         }
