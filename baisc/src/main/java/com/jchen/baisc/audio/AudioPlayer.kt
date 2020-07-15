@@ -1,4 +1,4 @@
-package com.jchen.openglstudy.audio
+package com.jchen.baisc.audio
 
 import android.content.Context
 import android.media.AudioAttributes
@@ -8,7 +8,7 @@ import android.media.AudioTrack
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.jchen.openglstudy.utils.AudioRecordUtil
+import com.jchen.baisc.util.AudioRecordUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

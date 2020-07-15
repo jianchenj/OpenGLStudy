@@ -1,8 +1,8 @@
-package com.jchen.openglstudy.utils
+package com.jchen.baisc.util
 
 import android.media.AudioFormat
 import android.media.AudioRecord
-import com.jchen.openglstudy.audio.AudioInfo
+import com.jchen.baisc.audio.AudioInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.FileInputStream
@@ -37,7 +37,11 @@ object AudioRecordUtil {
             val longSampleRate = audioInfo.sampleRate.toLong()
             val channels = if (audioInfo.channel == AudioFormat.CHANNEL_IN_MONO) 1 else 2
             val byteRate = 16 * audioInfo.sampleRate * channels / 8.toLong()
-            val data = ByteArray(getMinBufferSize(audioInfo))
+            val data = ByteArray(
+                getMinBufferSize(
+                    audioInfo
+                )
+            )
             try {
                 `in` = FileInputStream(srcFilename)
                 out = FileOutputStream(dstFilename)

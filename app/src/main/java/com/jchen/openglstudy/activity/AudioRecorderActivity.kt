@@ -8,12 +8,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.jchen.baisc.audio.AudioInfo
+import com.jchen.baisc.audio.AudioPlayer
+import com.jchen.baisc.audio.AudioRecorder
+import com.jchen.baisc.util.AudioRecordUtil
 import com.jchen.baisc.util.PermissionUtil
 import com.jchen.openglstudy.R
-import com.jchen.openglstudy.audio.AudioInfo
-import com.jchen.openglstudy.audio.AudioPlayer
-import com.jchen.openglstudy.audio.AudioRecorder
-import com.jchen.openglstudy.utils.AudioRecordUtil
 import kotlinx.android.synthetic.main.content_audio_record.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -26,8 +26,10 @@ class AudioRecorderActivity : AppCompatActivity(), View.OnClickListener {
 
     private var pcmPath: String? = null
     private var wavPath: String? = null
+    private var aacPath: String? = null
 
-    private var mAudioInfo: AudioInfo = AudioInfo()
+    private var mAudioInfo: AudioInfo =
+        AudioInfo()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +37,10 @@ class AudioRecorderActivity : AppCompatActivity(), View.OnClickListener {
         setSupportActionBar(findViewById(R.id.toolbar))
         pcmPath = "${this.getExternalFilesDir(Environment.DIRECTORY_MUSIC)}/test.pcm"
         wavPath = "${this.getExternalFilesDir(Environment.DIRECTORY_MUSIC)}/test.wav"
+        aacPath = "${this.getExternalFilesDir(Environment.DIRECTORY_MUSIC)}/test.aac"
         PermissionUtil.checkAudioRecordPermissions(this@AudioRecorderActivity)
-        audioRecorder = AudioRecorder(applicationContext, mAudioInfo)
+        audioRecorder =
+            AudioRecorder(applicationContext, mAudioInfo)
         audioPlayer = AudioPlayer(applicationContext)
         start_recording.setOnClickListener(this)
         stop_recording.setOnClickListener(this)
@@ -53,7 +57,8 @@ class AudioRecorderActivity : AppCompatActivity(), View.OnClickListener {
             R.id.start_recording -> {
                 MainScope().launch {
 
-                    audioRecorder!!.startRecord(pcmPath!!)
+                    //audioRecorder!!.startRecord(pcmPath!!)
+                    audioRecorder!!.startRecordAAC(aacPath!!)
                 }
             }
 
@@ -74,7 +79,7 @@ class AudioRecorderActivity : AppCompatActivity(), View.OnClickListener {
 
             R.id.play_recording -> {
                 MainScope().launch {
-                    wavPath?.let { audioPlayer!!.playInModeStream(mAudioInfo, it) }
+                    aacPath?.let { audioPlayer!!.playInModeStream(mAudioInfo, "/storage/emulated/0/Android/data/com.jchen.openglstudy/files/Music/ch00.aac") }
                 }
             }
 

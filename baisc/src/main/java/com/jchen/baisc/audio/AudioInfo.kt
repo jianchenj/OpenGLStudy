@@ -1,4 +1,4 @@
-package com.jchen.openglstudy.audio
+package com.jchen.baisc.audio
 
 import android.media.AudioFormat
 
@@ -9,6 +9,11 @@ import android.media.AudioFormat
  *
  * format :  采样位数，返回的音频数据的格式。 ENCODING_PCM_8BIT, ENCODING_PCM_16BIT, and ENCODING_PCM_FLOAT.
  */
-data class AudioInfo(var sampleRate: Int = 44100, var channel: Int = AudioFormat.CHANNEL_IN_STEREO, var format: Int = AudioFormat.ENCODING_PCM_16BIT) {
+data class AudioInfo(
+    var sampleRate: Int = 44100,
+    var channel: Int = AudioFormat.CHANNEL_IN_MONO,
+    var format: Int = AudioFormat.ENCODING_PCM_16BIT,
+    var bitRate: Int = 96000
+) {
 
 }
