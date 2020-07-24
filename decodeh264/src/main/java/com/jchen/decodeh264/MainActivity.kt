@@ -99,47 +99,8 @@ class MainActivity : AppCompatActivity() {
                 00 00 00 01 61    (P帧)*/
                 if (Use_SPS_and_PPS) {
                     // TODO: 2020/7/22 这段数组看不明白
-                    val header_sps = byteArrayOf(
-                        0,
-                        0,
-                        0,
-                        1,
-                        67,
-                        66,
-                        0,
-                        42,
-                        149.toByte(),
-                        168.toByte(),
-                        30,
-                        0,
-                        137.toByte(),
-                        249.toByte(),
-                        102,
-                        224.toByte(),
-                        32,
-                        32,
-                        32,
-                        64
-                    )
-                    val header_pps = byteArrayOf(
-                        0,
-                        0,
-                        0,
-                        1,
-                        68,
-                        206.toByte(),
-                        60,
-                        128.toByte(),
-                        0,
-                        0,
-                        0,
-                        1,
-                        6,
-                        229.toByte(),
-                        1,
-                        151.toByte(),
-                        128.toByte()
-                    )
+                    val header_sps = byteArrayOf(0, 0, 0, 1, 67, 66, 0, 42, 149.toByte(), 168.toByte(), 30, 0, 137.toByte(), 249.toByte(), 102, 224.toByte(), 32, 32, 32, 64)
+                    val header_pps = byteArrayOf(0, 0, 0, 1, 68, 206.toByte(), 60, 128.toByte(), 0, 0, 0, 1, 6, 229.toByte(), 1, 151.toByte(), 128.toByte())
                     //对于H.264来说，"csd-0"和"csd-1"分别对应sps和pps；对于AAC来说，"csd-0"对应ADTS
                     mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(header_sps))
                     mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(header_pps))
@@ -207,13 +168,7 @@ class MainActivity : AppCompatActivity() {
                         //将可用的字节数组，传入缓冲区
                         byteBuffer.put(streamBuffer, startIndex, nextFrameStart - startIndex)
                         //把数据传递给解码器
-                        mMediaCodec!!.queueInputBuffer(
-                            inputIndex,
-                            0,
-                            nextFrameStart - startIndex,
-                            0,
-                            0
-                        )
+                        mMediaCodec!!.queueInputBuffer(inputIndex, 0, nextFrameStart - startIndex, 0, 0)
                         //指定下一帧的位置
                         startIndex = nextFrameStart
                         Log.i("test0723", " startIndex = $startIndex")
