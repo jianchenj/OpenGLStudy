@@ -1,3 +1,4 @@
+include ':decodeh264'
 include ':encodeh264'
 include ':baisc'
 include ':avEdit'
